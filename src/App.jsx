@@ -13,8 +13,9 @@ const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [volume, setVolume] = useState(0.7);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false); // NEW: Track user interaction
 
-  // Artist data with their songs
+  // Artist data with their songs - FIXED PATHS
   const artists = {
     MdRafi: {
       name: 'Mohammad Rafi',
@@ -248,54 +249,125 @@ const App = () => {
   const currentSong = sortedSongs[currentSongIndex];
 
   // Handle artist selection
-  const handleArtistSelect = (artist) => {
+  const handleArtistSelect = async (artist) => {
     setCurrentArtist(artist);
     setCurrentSongIndex(0);
-    setIsPlaying(true);
+    
+    // Don't auto-play, just set up
+    setIsPlaying(false);
+    
+    // Ensure AudioContext is ready
+    await resumeAudioContext();
   };
 
-  // Play/Pause toggle
-  const togglePlay = () => {
+  // Play/Pause toggle - FIXED with user interaction tracking
+  const togglePlay = async () => {
+    if (!hasUserInteracted) {
+      setHasUserInteracted(true);
+    }
+    
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+      try {
+        await resumeAudioContext(); // Resume AudioContext first
+        
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (error) {
+        console.error("Playback error:", error);
+        setIsPlaying(false);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   // Next song
-  const nextSong = () => {
+  const nextSong = async () => {
     const nextIndex = (currentSongIndex + 1) % sortedSongs.length;
     setCurrentSongIndex(nextIndex);
-    setIsPlaying(true);
+    
+    // Resume AudioContext before playing next song
+    await resumeAudioContext();
+    
+    if (isPlaying && audioRef.current) {
+      try {
+        await audioRef.current.play();
+      } catch (error) {
+        console.error("Auto-play prevented:", error);
+        // Wait for user interaction
+        setIsPlaying(false);
+      }
+    }
   };
 
   // Previous song
-  const prevSong = () => {
+  const prevSong = async () => {
     const prevIndex = (currentSongIndex - 1 + sortedSongs.length) % sortedSongs.length;
     setCurrentSongIndex(prevIndex);
-    setIsPlaying(true);
+    
+    // Resume AudioContext before playing previous song
+    await resumeAudioContext();
+    
+    if (isPlaying && audioRef.current) {
+      try {
+        await audioRef.current.play();
+      } catch (error) {
+        console.error("Auto-play prevented:", error);
+        // Wait for user interaction
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  // Resume AudioContext - CRITICAL FIX
+  const resumeAudioContext = async () => {
+    if (!audioContextRef.current) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContextRef.current = new AudioContext();
+      
+      if (audioRef.current) {
+        sourceRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        
+        analyserRef.current.fftSize = 256;
+        sourceRef.current.connect(analyserRef.current);
+        analyserRef.current.connect(audioContextRef.current.destination);
+      }
+    }
+    
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+      console.log("AudioContext resumed");
+    }
+    
+    return audioContextRef.current;
   };
 
   const handleTimeUpdate = () => {
-    setProgress(audioRef.current.currentTime);
+    if (audioRef.current) {
+      setProgress(audioRef.current.currentTime);
+    }
   };
   
   const handleLoadedMetadata = () => {
-    setDuration(audioRef.current.duration);
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
   };
   
   const handleSeek = (e) => {
     const newTime = Number(e.target.value);
-    audioRef.current.currentTime = newTime;
-    setProgress(newTime);
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+      setProgress(newTime);
+    }
   };
 
   const formatTime = (time) => {
-    if (!time) return "0:00";
+    if (!time || isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
@@ -311,52 +383,35 @@ const App = () => {
   };
 
   const startBeatGlow = () => {
-    const analyser = analyserRef.current;
-    if (!analyser) return;
+    if (!analyserRef.current) return;
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
 
     const animate = () => {
-      analyser.getByteFrequencyData(dataArray);
-
-      // Average volume
+      analyserRef.current.getByteFrequencyData(dataArray);
+      
       const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-
-      // Normalize glow strength
       const glow = Math.min(avg / 50, 3);
 
-      document.documentElement.style.setProperty(
-        "--beat-glow",
-        `${glow}`
-      );
-
-      requestAnimationFrame(animate);
+      document.documentElement.style.setProperty("--beat-glow", `${glow}`);
+      
+      if (isPlaying) {
+        requestAnimationFrame(animate);
+      }
     };
 
     animate();
   };
 
-  const resumeAudioContext = async () => {
-    if (!audioContextRef.current) return;
-
-    if (audioContextRef.current.state === "suspended") {
-      await audioContextRef.current.resume();
-      console.log("AudioContext resumed");
-    }
-  };
-
-  const dataArrayRef = useRef(null); // Add this ref for particles
-
   const startParticles = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    
     const ctx = canvas.getContext("2d");
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     let particles = [];
-
     for (let i = 0; i < 120; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -367,15 +422,15 @@ const App = () => {
       });
     }
 
+    const dataArray = new Uint8Array(analyserRef.current?.frequencyBinCount || 0);
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const data = dataArrayRef.current;
       let beat = 0;
-
-      if (analyserRef.current && data) {
-        analyserRef.current.getByteFrequencyData(data);
-        beat = data[2] / 255; // bass feel
+      if (analyserRef.current && isPlaying) {
+        analyserRef.current.getByteFrequencyData(dataArray);
+        beat = dataArray[2] / 255;
       }
 
       particles.forEach(p => {
@@ -395,7 +450,9 @@ const App = () => {
         ctx.fill();
       });
 
-      requestAnimationFrame(animate);
+      if (isPlaying) {
+        requestAnimationFrame(animate);
+      }
     };
 
     animate();
@@ -403,44 +460,48 @@ const App = () => {
 
   // Handle song ended
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.onended = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      const handleEnded = () => {
         nextSong();
       };
-    }
-  }, [currentSongIndex]);
-
-  // Auto-play when song changes
-  useEffect(() => {
-    if (audioRef.current && isPlaying) {
-      audioRef.current.play().catch(e => console.log("Auto-play prevented:", e));
-    }
-  }, [currentSong, isPlaying]);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    if (!audioContextRef.current) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      audioContextRef.current = new AudioContext();
-
-      sourceRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
-      analyserRef.current = audioContextRef.current.createAnalyser();
-
-      analyserRef.current.fftSize = 256;
       
-      // Initialize dataArrayRef
-      dataArrayRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
-
-      sourceRef.current.connect(analyserRef.current);
-      analyserRef.current.connect(audioContextRef.current.destination);
+      audio.addEventListener('ended', handleEnded);
+      
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+      };
     }
+  }, [currentSongIndex, isPlaying]);
+
+  // Handle window resize for canvas
+  useEffect(() => {
+    const handleResize = () => {
+      if (canvasRef.current) {
+        canvasRef.current.width = window.innerWidth;
+        canvasRef.current.height = window.innerHeight;
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
+
+  // Initialize canvas when playing starts
+  useEffect(() => {
+    if (isPlaying && hasUserInteracted) {
+      startBeatGlow();
+      startParticles();
+    }
+  }, [isPlaying, hasUserInteracted]);
 
   return (
     <div className="music-player">
       {/* Background Music Symbols */}
-      <div className="bg-music-symbol left">𝄞</div>   {/* Treble Clef */}
+      <div className="bg-music-symbol left">𝄞</div>
       <div className="bg-music-symbol right">𝄞</div>
 
       {/* Floating notes animation */}
@@ -462,7 +523,7 @@ const App = () => {
         <p className="subtitle">Experience the legends of Indian music</p>
       </header>
 
-      {/* Animated Artist Images */}
+      {/* Animated Artist Images - FIXED image paths */}
       <div className="artists-container">
         {Object.entries(artists).map(([key, artist]) => (
           <div 
@@ -472,7 +533,7 @@ const App = () => {
           >
             <div className="artist-image-wrapper">
               <img 
-                src={`/images/${key.toLowerCase()}.jpg`} 
+                src={`/music-player/images/${key.toLowerCase()}.jpg`} // Changed path
                 alt={artist.name}
                 className="artist-image"
                 onError={(e) => {
@@ -493,7 +554,7 @@ const App = () => {
       <div className="player-container">
         <div className="current-song-info">
           <h2>Now Playing: {currentArtistData.name}</h2>
-          <h3>{currentSong.title}</h3>
+          <h3>{currentSong?.title || 'Select a song'}</h3>
           <p>Song {currentSongIndex + 1} of {currentArtistData.songs.length}</p>
         </div>
 
@@ -502,7 +563,11 @@ const App = () => {
             ⏮
           </button>
           
-          <button className="control-btn play-pause" onClick={togglePlay} title={isPlaying ? 'Pause' : 'Play'}>
+          <button 
+            className="control-btn play-pause" 
+            onClick={togglePlay} 
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
             {isPlaying ? '⏸' : '▶️'}
           </button>
           
@@ -520,6 +585,7 @@ const App = () => {
             max={duration || 0}
             value={progress}
             onChange={handleSeek}
+            className="progress-slider"
           />
           <span>{formatTime(duration)}</span>
         </div>
@@ -547,8 +613,9 @@ const App = () => {
               <li 
                 key={index}
                 className={index === currentSongIndex ? 'active-song' : ''}
-                onClick={() => {
+                onClick={async () => {
                   setCurrentSongIndex(index);
+                  await resumeAudioContext();
                   setIsPlaying(true);
                 }}
               >
@@ -559,42 +626,46 @@ const App = () => {
         </div>
       </div>
 
-      {/* Animated Buttons */}
-      <div className="artist-buttons">
-        {Object.keys(artists).map((artist) => (
-          <button
-            key={artist}
-            className={`artist-btn ${currentArtist === artist ? 'active-btn' : ''}`}
-            onClick={() => handleArtistSelect(artist)}
-          >
-            <span className="btn-text">Play {artist === 'MD' ? 'Mohammad Rafi' : artists[artist].name}</span>
-            <span className="btn-icon">🎵</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Hidden Audio Element */}
+      {/* Hidden Audio Element - REMOVED auto-play attributes */}
       <audio
         ref={audioRef}
         src={currentSong?.src}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
-        onPlay={async () => {
-          setIsPlaying(true);
-          await resumeAudioContext();
-          startBeatGlow();
-          startParticles();
+        onPlay={() => {
           console.log("Playing");
         }}
-        onPause={() => setIsPlaying(false)}
-        controls={false}
+        onPause={() => {
+          console.log("Paused");
+          setIsPlaying(false);
+        }}
+        onError={(e) => {
+          console.error("Audio error:", e);
+          setIsPlaying(false);
+        }}
+        preload="metadata"
       />
 
       {/* Canvas for particles */}
-      <canvas ref={canvasRef} id="particles-canvas"></canvas>
+      <canvas 
+        ref={canvasRef} 
+        id="particles-canvas"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: -1
+        }}
+      />
 
       <footer>
         <p>Made with ❤️ for classic music lovers</p>
+        {!hasUserInteracted && (
+          <p className="click-hint">👆 Click the play button to start music</p>
+        )}
       </footer>
     </div>
   );
