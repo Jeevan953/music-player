@@ -66,3 +66,29 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* H1 Animation */
+.title-animate {
+  animation: slideFadeIn 1.2s ease-out forwards;
+}
+
+/* Subtitle Animation */
+.subtitle-animate {
+  animation: slideFadeIn 1.2s ease-out forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+/* Keyframes */
+@keyframes slideFadeIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+

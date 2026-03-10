@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
+import Equalizer from "./Equalizer";
+
 
 const App = () => {
   const audioRef = useRef(null);
@@ -16,223 +18,91 @@ const App = () => {
   const [hasUserInteracted, setHasUserInteracted] = useState(false); // NEW: Track user interaction
 
   // Artist data with their songs - FIXED PATHS
-  const artists = {
+    const BASE = import.meta.env.BASE_URL;
+    const artists = {
     MdRafi: {
       name: 'Mohammad Rafi',
       displayName: 'MdRafi',
-      songs: [
-        { title: 'Aa Gale Lagja', src: '/audio/rafi/song1.mp3' },
-        { title: 'Aaja Aaja Main Hoon Pyar Tera', src: '/audio/rafi/song2.mp3' },
-        { title: 'Aa Ja Re Aa Zara', src: '/audio/rafi/song3.mp3' },
-        { title: 'Aajkal Tere Mere Pyar Ke Charche', src: '/audio/rafi/song4.mp3' },
-        { title: 'Aaj Purani Rahose', src: '/audio/rafi/song5.mp3' },
-        { title: 'Aa Raat Jati Hai Chupke Se', src: '/audio/rafi/song6.mp3' },
-        { title: 'Aasman Se Aaya Farishta', src: '/audio/rafi/song7.mp3' },
-        { title: 'Ae Chand Ki Zebai Tu', src: '/audio/rafi/song8.mp3' },
-        { title: 'Akela Hoon Main', src: '/audio/rafi/song9.mp3' },
-        { title: 'Akela Hoon Main Jaal', src: '/audio/rafi/song10.mp3' },
-        { title: 'Akele Akele Kahan Ja Rahe Ho', src: '/audio/rafi/song11.mp3' },
-        { title: 'An Evening In Paris', src: '/audio/rafi/song12.mp3' },
-        { title: 'Chale The Saath Milkar', src: '/audio/rafi/song13.mp3' },
-        { title: 'Chaudhvin Ka Chand Ho', src: '/audio/rafi/song14.mp3' },
-        { title: 'Chhalka Yeh Jaam', src: '/audio/rafi/song15.mp3' },
-        { title: 'Chura Liya Hai Tumne Jo Dil Ko', src: '/audio/rafi/song16.mp3' },
-        { title: 'Dheere Dheere Chal Chand', src: '/audio/rafi/song17.mp3' },
-        { title: 'Dilbar Dilbar Kahte Kahte Hua Diwana', src: '/audio/rafi/song18.mp3' },
-        { title: 'Dil Beqarar Sa Hai', src: '/audio/rafi/song19.mp3' },
-        { title: 'Dil Ke Jharokhe Mein', src: '/audio/rafi/song20.mp3' },
-        { title: 'Dil Ne Pyar Kiya Hai', src: '/audio/rafi/song21.mp3' },
-        { title: 'Dil Tera Diwana Hai Sanam', src: '/audio/rafi/song22.mp3' },
-        { title: 'Diwane Ka Naam To Poochho', src: '/audio/rafi/song23.mp3' },
-        { title: 'Ek Tha Gul Aur Ek Thi Bulbul', src: '/audio/rafi/song24.mp3' },
-        { title: 'Gulabi Aankhen Jo Teri Dekhi', src: '/audio/rafi/song25.mp3' },
-        { title: 'Gun Guna Rahe Hai Bhanvare', src: '/audio/rafi/song26.mp3' },
-        { title: 'Jag Dil Le Diwana', src: '/audio/rafi/song27.mp3' },
-        { title: 'Jane Chaman Shola Badan', src: '/audio/rafi/song28.mp3' },
-        { title: 'Kabhi Raat Din Hum Door The', src: '/audio/rafi/song29.mp3' },
-        { title: 'Kah Do Koi Na Kare Yahan Pyar', src: '/audio/rafi/song30.mp3' },
-        { title: 'Kaun Hai Jo Sapnon Mein Aaya', src: '/audio/rafi/song31.mp3' },
-        { title: 'Khuli Palak Mein Jhoota Gussa', src: '/audio/rafi/song32.mp3' },
-        { title: 'Likhe Jo Khat Tujhe', src: '/audio/rafi/song33.mp3' },
-        { title: 'Love In Tokyo', src: '/audio/rafi/song34.mp3' },
-        { title: 'Main Chali Main Chali', src: '/audio/rafi/song35.mp3' },
-        { title: 'Maine Rakkha Hai Mohabbat', src: '/audio/rafi/song36.mp3' },
-        { title: 'Main Gaoon Tum So Jao', src: '/audio/rafi/song37.mp3' },
-        { title: 'Main Kahin Kavi Na Ban Jaoon', src: '/audio/rafi/song38.mp3' },
-        { title: 'Mera Dushman Tu Meri Dosti Ko Tarse', src: '/audio/rafi/song39.mp3' },
-        { title: 'Mera To Jo Bhi Kadam', src: '/audio/rafi/song40.mp3' },
-        { title: 'Mile Na Phool To Kanton Se Dosti', src: '/audio/rafi/song41.mp3' },
-        { title: 'Nain Mila Kar Chain Churana', src: '/audio/rafi/song42.mp3' },
-        { title: 'Na Ja Kahin Ab Na Ja', src: '/audio/rafi/song43.mp3' },
-        { title: 'Na Tu Zameen Ke Liye', src: '/audio/rafi/song44.mp3' },
-        { title: 'Na Tu Zameen Ke Liye', src: '/audio/rafi/song45.mp3' },
-        { title: 'Nazar Na Lag Jaye Kisiki Rahon Mein', src: '/audio/rafi/song46.mp3' },
-        { title: 'O Nanhe Se Farishtey', src: '/audio/rafi/song47.mp3' },
-        { title: 'O Sathi O Sathi O', src: '/audio/rafi/song48.mp3' },
-        { title: 'Panchhi Re O Panchhi', src: '/audio/rafi/song49.mp3' },
-        { title: 'Parda Hata Do', src: '/audio/rafi/song50.mp3' },
-        { title: 'Pukarta Chala Hoon Mai', src: '/audio/rafi/song51.mp3' },
-        { title: 'Rang Aur Noor Ki Barat', src: '/audio/rafi/song52.mp3' },
-        { title: 'Rimjhim Gire Saawan', src: '/audio/rafi/song53.mp3' },
-        { title: 'Sachcha Hai Pyar Mera Agar', src: '/audio/rafi/song54.mp3' },
-        { title: 'Sau Baar Janam Lenge', src: '/audio/rafi/song55.mp3' },
-        { title: 'Suhani Raat Dhal Chuki', src: '/audio/rafi/song56.mp3' },
-        { title: 'Teri Galiyon Mein', src: '/audio/rafi/song57.mp3' },
-        { title: 'Tu Mere Sapnon Ki Rani Banegi', src: '/audio/rafi/song58.mp3' },
-        { title: 'Tumhari Nazar Kyon Khafa Ho Gayi', src: '/audio/rafi/song59.mp3' },
-        { title: 'Yeh Anjaan Raahen', src: '/audio/rafi/song60.mp3' }
-      ]
+      songs: []
     },
+
     Kishore: {
   name: 'Kishore Kumar',
   displayName: 'Kishore',
   songs: [
-  { "title": "Aaj Unse Pehli Mulaqat Hogi", "src": "/audio/kishore/01 - Aaj Unse Pehli Mulaqat Hogi.mp3" },
-  { "title": "Aanewala Pal Janewala Hai", "src": "/audio/kishore/02 - Aanewala Pal Janewala Hai.mp3" },
-  { "title": "Aasman Ke Neeche", "src": "/audio/kishore/03 - Aasman Ke Neeche.mp3" },
-  { "title": "Aise Na Mujhe", "src": "/audio/kishore/04 - Aise Na Mujhe.mp3" },
-  { "title": "Apni To Jaise Taise", "src": "/audio/kishore/05 - Apni To Jaise Taise.mp3" },
-  { "title": "Are Jaane Kaise Kab Kahan", "src": "/audio/kishore/06 - Are Jaane Kaise Kab Kahan.mp3" },
-  { "title": "Baad Muddat Ke Hum Tum Mile", "src": "/audio/kishore/07 - Baad Muddat Ke Hum Tum Mile.mp3" },
-  { "title": "Baap Ki Kasam", "src": "/audio/kishore/08 - Baap Ki Kasam.mp3" },
-  { "title": "Bhool Gaya Sab Kuch", "src": "/audio/kishore/09 - Bhool Gaya Sab Kuch.mp3" },
-  { "title": "Bye Bye Miss Goodnight", "src": "/audio/kishore/10 - Bye Bye Miss Goodnight.mp3" },
-  { "title": "Chala Jata Hoon", "src": "/audio/kishore/11 - Chala Jata Hoon.mp3" },
-  { "title": "Chalte Chalte Mere Yeh Geet", "src": "/audio/kishore/12 - Chalte Chalte Mere Yeh Geet.mp3" },
-  { "title": "Chhukar Mere Man Ko", "src": "/audio/kishore/13 - Chhukar Mere Man Ko.mp3" },
-  { "title": "Dilbar Mere Kab Tak Mujhe", "src": "/audio/kishore/14 - Dilbar Mere Kab Tak Mujhe.mp3" },
-  { "title": "Dil Ki Batein Dil Ki Jane", "src": "/audio/kishore/15 - Dil Ki Batein Dil Ki Jane.mp3" },
-  { "title": "Dil Kya Kare", "src": "/audio/kishore/16 - Dil Kya Kare.mp3" },
-  { "title": "Ek Ajnabi Hasina Se", "src": "/audio/kishore/17 - Ek Ajnabi Hasina Se.mp3" },
-  { "title": "Ek Ladki Bheegi Bhagisi", "src": "/audio/kishore/18 - Ek Ladki Bheegi Bhagisi.mp3" },
-  { "title": "Gum Hai Kisi Mein", "src": "/audio/kishore/19 - Gum Hai Kisi Mein.mp3" },
-  { "title": "Guzar Jayen Din Din", "src": "/audio/kishore/20 - Guzar Jayen Din Din.mp3" },
-  { "title": "Haan Pehli Bar", "src": "/audio/kishore/21 - Haan Pehli Bar.mp3" },
-  { "title": "Haare Na Insaan", "src": "/audio/kishore/22 - Haare Na Insaan.mp3" },
-  { "title": "Hum Apki Ankon Mein", "src": "/audio/kishore/23 - Hum Apki Ankon Mein.mp3" },
-  { "title": "Hum Hai Raahi Pyar Ke", "src": "/audio/kishore/24 - Hum Hai Raahi Pyar Ke.mp3" },
-  { "title": "Ik Rasta Hai Zindagi", "src": "/audio/kishore/25 - Ik Rasta Hai Zindagi.mp3" },
-  { "title": "Inteha Ho Gayi", "src": "/audio/kishore/26 - Inteha Ho Gayi.mp3" },
-  { "title": "Jawani Jawani Jalti Jawani", "src": "/audio/kishore/27 - Jawani Jawani Jalti Jawani.mp3" },
-  { "title": "Jawani Ka Khazana", "src": "/audio/kishore/28 - Jawani Ka Khazana.mp3" },
-  { "title": "Jeevan Ke Din", "src": "/audio/kishore/29 - Jeevan Ke Din.mp3" },
-  { "title": "Jeevan Ke Safar Mein", "src": "/audio/kishore/30 - Jeevan Ke Safar Mein.mp3" },
-  { "title": "Jeevan Mitana Hai", "src": "/audio/kishore/31 - Jeevan Mitana Hai.mp3" },
-  { "title": "Kabhi Hoti Nahi Hai", "src": "/audio/kishore/32 - Kabhi Hoti Nahi Hai.mp3" },
-  { "title": "Kaise Kahen Hum", "src": "/audio/kishore/33 - Kaise Kahen Hum.mp3" },
-  { "title": "Kehna Hai Kehna Hai", "src": "/audio/kishore/34 - Kehna Hai Kehna Hai.mp3" },
-  { "title": "Koi Bhi Dil Men Na Aaya Tha", "src": "/audio/kishore/35 - Koi Bhi Dil Men Na Aaya Tha.mp3" },
-  { "title": "Koi Roko Na Priyatama", "src": "/audio/kishore/36 - Koi Roko Na Priyatama.mp3" },
-  { "title": "Koya Koya Rahe Teri", "src": "/audio/kishore/37 - Koya Koya Rahe Teri.mp3" },
-  { "title": "Mere Dil Mein Aaj Kya Hai", "src": "/audio/kishore/38 - Mere Dil Mein Aaj Kya Hai.mp3" },
-  { "title": "Mere Pyase Man Ki Bahar", "src": "/audio/kishore/39 - Mere Pyase Man Ki Bahar.mp3" },
-  { "title": "Mere Mehboob Qayamat Hogi", "src": "/audio/kishore/40 - Mere Mehboob Qayamat Hogi.mp3" },
-  { "title": "Mere Sapnon Ki Rani", "src": "/audio/kishore/41 - Mere Sapnon Ki Rani.mp3" },
-  { "title": "Muskurata Hua", "src": "/audio/kishore/42 - Muskurata Hua.mp3" },
-  { "title": "Neeli Neeli Ambar", "src": "/audio/kishore/43 - Neeli Neeli Ambar.mp3" },
-  { "title": "Oh Hansini", "src": "/audio/kishore/44 - Oh Hansini.mp3" },
-  { "title": "Oh Mere Dil Ke Chain", "src": "/audio/kishore/45 - Oh Mere Dil Ke Chain.mp3" },
-  { "title": "Oh Nigahein Mastana", "src": "/audio/kishore/46 - Oh Nigahein Mastana.mp3" },
-  { "title": "Pal Pal Dil Ke Paas", "src": "/audio/kishore/47 - Pal Pal Dil Ke Paas.mp3" },
-  { "title": "Phoolon Ke Rang Se", "src": "/audio/kishore/48 - Phoolon Ke Rang Se.mp3" },
-  { "title": "Pyar Deewana Hota Hai", "src": "/audio/kishore/49 - Pyar Deewana Hota Hai.mp3" },
-  { "title": "Roop Tera Mastana", "src": "/audio/kishore/50 - Roop Tera Mastana.mp3" },
-  { "title": "Saath Mein Pyara Saathi Hai", "src": "/audio/kishore/51 - Saath Mein Pyara Saathi Hai.mp3" },
-  { "title": "Sama Hai Suhana Suhana", "src": "/audio/kishore/52 - Sama Hai Suhana Suhana.mp3" },
-  { "title": "Sara Zamana", "src": "/audio/kishore/53 - Sara Zamana.mp3" },
-  { "title": "Sheeshe Gharon Mein", "src": "/audio/kishore/54 - Sheeshe Gharon Mein.mp3" },
-  { "title": "Takatu Taka Tai", "src": "/audio/kishore/55 - Takatu Taka Tai.mp3" },
-  { "title": "Tera Peeche Na Chhodunga", "src": "/audio/kishore/56 - Tera Peeche Na Chhodunga.mp3" },
-  { "title": "Tere Humsafar Geet Hain Tere", "src": "/audio/kishore/57 - Tere Humsafar Geet Hain Tere.mp3" },
-  { "title": "Tere Jaisa Mukhda To", "src": "/audio/kishore/58 - Tere Jaisa Mukhda To.mp3" },
-  { "title": "Tujh Sa Haseen", "src": "/audio/kishore/59 - Tujh Sa Haseen.mp3" },
-  { "title": "Tum Aa Gaye Ho Noor", "src": "/audio/kishore/60 - Tum Aa Gaye Ho Noor.mp3" },
-  { "title": "Tum Bin Jaoon Kahan", "src": "/audio/kishore/61 - Tum Bin Jaoon Kahan.mp3" },
-  { "title": "Tum Saath Ho Jab Apne", "src": "/audio/kishore/62 - Tum Saath Ho Jab Apne.mp3" },
-  { "title": "Wadon Nahi Rasmon Se Pyar Se", "src": "/audio/kishore/63 - Wadon Nahi Rasmon Se Pyar Se.mp3" },
-  { "title": "Waqt Se Pehle", "src": "/audio/kishore/64 - Waqt Se Pehle.mp3" },
-  { "title": "Yeh Dil Na Hota Bechara", "src": "/audio/kishore/65 - Yeh Dil Na Hota Bechara.mp3" },
-  { "title": "Yeh Jo Mohabbat Hai", "src": "/audio/kishore/66 - Yeh Jo Mohabbat Hai.mp3" },
-  { "title": "Yeh Lal Rang", "src": "/audio/kishore/67 - Yeh Lal Rang.mp3" },
-  { "title": "Yeh Shaam Mastani", "src": "/audio/kishore/68 - Yeh Shaam Mastani.mp3" },
-  { "title": "Yeh Wada Raha", "src": "/audio/kishore/69 - Yeh Wada Raha.mp3" },
-  { "title": "Zindagi Ek Safar Hai Suhana", "src": "/audio/kishore/70 - Zindagi Ek Safar Hai Suhana.mp3" },
-  { "title": "Zindagi Ka Safar", "src": "/audio/kishore/71 - Zindagi Ka Safar.mp3" },
-  { "title": "Aate Jate Khoobsurat Awara", "src": "/audio/kishore/72 - Aate Jate Khoobsurat Awara.mp3" },
-  { "title": "Aisa Kabhi Hua Nahin", "src": "/audio/kishore/73 - Aisa Kabhi Hua Nahin.mp3" },
-  { "title": "Bachna Ae Haseeno", "src": "/audio/kishore/74 - Bachna Ae Haseeno.mp3" },
-  { "title": "Koi Bhi Dil Men Na Aaya Tha Laparwah", "src": "/audio/kishore/75 - Koi Bhi Dil Men Na Aaya Tha Laparwah.mp3" },
-  { "title": "Yaadon Ki Baarat Nikli Hai", "src": "/audio/kishore/76 - Yaadon Ki Baarat Nikli Hai.mp3" }
- ]
+{ title: "Aa Chal Ke Tujhe", src: `${BASE}audio/kishore/01 - Aa Chal Ke Tujhe.mp3` },
+{ title: "Aachal Pe Tera Hi Naam Likha Aakhri Sanghursh 128 Kbps", src: `${BASE}audio/kishore/02 - Aachal Pe Tera Hi Naam Likha Aakhri Sanghursh 128 Kbps.mp3` },
+{ title: "Aadhi Ye Raat Jale Jeene Ki Arzoo 128 Kbps", src: `${BASE}audio/kishore/03 - Aadhi Ye Raat Jale Jeene Ki Arzoo 128 Kbps.mp3` },
+{ title: "Aai Ghir Ghir Sawan Ke", src: `${BASE}audio/kishore/04 - Aai Ghir Ghir Sawan Ke.mp3` },
+{ title: "Aai Khuda Har Faisla", src: `${BASE}audio/kishore/05 - Aai Khuda Har Faisla.mp3` },
+{ title: "Aaja Aaja Main Hoon Pyar Tera Teesri Manzil 128 Kbps", src: `${BASE}audio/kishore/06 - Aaja Aaja Main Hoon Pyar Tera Teesri Manzil 128 Kbps.mp3` },
+{ title: "Aaja Aaja Nahin Abhi Nahin Man Mandir 128 Kbps", src: `${BASE}audio/kishore/07 - Aaja Aaja Nahin Abhi Nahin Man Mandir 128 Kbps.mp3` },
+{ title: "Aaj Abhi Yahin Inquilaab 128 Kbps", src: `${BASE}audio/kishore/08 - Aaj Abhi Yahin Inquilaab 128 Kbps.mp3` },
+{ title: "Aa Ja Pyare Aa Jao", src: `${BASE}audio/kishore/09 - Aa Ja Pyare Aa Jao.mp3` },
+{ title: "Aaja Raat Beeti Jaye Begunah 128 Kbps", src: `${BASE}audio/kishore/10 - Aaja Raat Beeti Jaye Begunah 128 Kbps.mp3` },
+{ title: "Aaja Tujhe Pyar Kar Loon", src: `${BASE}audio/kishore/11 - Aaja Tujhe Pyar Kar Loon.mp3` },
+{ title: "Aaja Ya Aa Jane De Paas Ek Haseena Do Diwane 128 Kbps", src: `${BASE}audio/kishore/12 - Aaja Ya Aa Jane De Paas Ek Haseena Do Diwane 128 Kbps.mp3` },
+{ title: "Aaj Bhadakti Aag Hai Dil Men Meri Dosti Tera Pyar 128 Kbps", src: `${BASE}audio/kishore/13 - Aaj Bhadakti Aag Hai Dil Men Meri Dosti Tera Pyar 128 Kbps.mp3` },
+{ title: "Aaj Ka Din", src: `${BASE}audio/kishore/14 - Aaj Ka Din.mp3` },
+{ title: "Aaj Kahin Na Ja Bade Dil Wala 128 Kbps", src: `${BASE}audio/kishore/15 - Aaj Kahin Na Ja Bade Dil Wala 128 Kbps.mp3` },
+{ title: "Aaj Ka Ye Din", src: `${BASE}audio/kishore/16 - Aaj Ka Ye Din.mp3` },
+{ title: "Aaj Ki Raat Mere Dil Ki Salami Lele", src: `${BASE}audio/kishore/17 - Aaj Ki Raat Mere Dil Ki Salami Lele.mp3` },
+{ title: "Aaj Madhosh Hua Jaye Re Revival Sharmilee 128 Kbps", src: `${BASE}audio/kishore/18 - Aaj Madhosh Hua Jaye Re Revival Sharmilee 128 Kbps.mp3` },
+{ title: "Aaj Mujhe Kuchh Kehna Hai", src: `${BASE}audio/kishore/19 - Aaj Mujhe Kuchh Kehna Hai.mp3` },
+{ title: "Aaj Pyare Pyare Se Lagte Hai Aap", src: `${BASE}audio/kishore/20 - Aaj Pyare Pyare Se Lagte Hai Aap.mp3` },
+{ title: "Aaj Rona Pada To Samjhe Girl Friend 1960 128 Kbps", src: `${BASE}audio/kishore/21 - Aaj Rona Pada To Samjhe Girl Friend 1960 128 Kbps.mp3` },
+{ title: "Aaj Unse Pehli Mulaqat Hogi Paraya Dhan 128 Kbps", src: `${BASE}audio/kishore/22 - Aaj Unse Pehli Mulaqat Hogi Paraya Dhan 128 Kbps.mp3` },
+{ title: "Aake Mil Ja", src: `${BASE}audio/kishore/23 - Aake Mil Ja.mp3` },
+{ title: "Aanewala Pal Janewala Hai Gol Maal 128 Kbps", src: `${BASE}audio/kishore/24 - Aanewala Pal Janewala Hai Gol Maal 128 Kbps.mp3` },
+{ title: "Aankhein Chaar From Tu Yaa Main", src: `${BASE}audio/kishore/25 - Aankhein Chaar (From Tu Yaa Main).mp3` },
+{ title: "Aankhen Milayenge Baaten Sunayenge Bhanwar 128 Kbps", src: `${BASE}audio/kishore/26 - Aankhen Milayenge Baaten Sunayenge Bhanwar 128 Kbps.mp3` },
+{ title: "Aankhen Tumhari Do Jahan Zameen Aasman 128 Kbps", src: `${BASE}audio/kishore/27 - Aankhen Tumhari Do Jahan Zameen Aasman 128 Kbps.mp3` },
+{ title: "Aao Mere Paas Kaun Kaisey 128 Kbps", src: `${BASE}audio/kishore/28 - Aao Mere Paas Kaun Kaisey 128 Kbps.mp3` },
+{ title: "Aao Mere Yaaro Aao", src: `${BASE}audio/kishore/29 - Aao Mere Yaaro Aao.mp3` },
+{ title: "Aap Apne Nashe Mein Jeete Hai Swayamvar 128 Kbps", src: `${BASE}audio/kishore/30 - Aap Apne Nashe Mein Jeete Hai Swayamvar 128 Kbps.mp3` },
+{ title: "Aap Ka Chehra Masha Allah", src: `${BASE}audio/kishore/31 - Aap Ka Chehra Masha Allah.mp3` },
+{ title: "Aapke Anurodh Pe Anurodh 128 Kbps", src: `${BASE}audio/kishore/32 - Aapke Anurodh Pe Anurodh 128 Kbps.mp3` },
+{ title: "Aapke Shahar Mein Aai Hoon Mehbooba 128 Kbps", src: `${BASE}audio/kishore/33 - Aapke Shahar Mein Aai Hoon Mehbooba 128 Kbps.mp3` },
+{ title: "Aap Ki Ankhon Mein Kuch Ghar 128 Kbps", src: `${BASE}audio/kishore/34 - Aap Ki Ankhon Mein Kuch Ghar 128 Kbps.mp3` },
+{ title: "Aap Sa Koi Haseen Chandi Sona 128 Kbps", src: `${BASE}audio/kishore/35 - Aap Sa Koi Haseen Chandi Sona 128 Kbps.mp3` },
+{ title: "Aap Yahan Aaye Kisliye", src: `${BASE}audio/kishore/36 - Aap Yahan Aaye Kisliye.mp3` },
+{ title: "Aashiq Hoon Baharon Ka Aashiq Hoon Baharon Ka 128 Kbps", src: `${BASE}audio/kishore/37 - Aashiq Hoon Baharon Ka Aashiq Hoon Baharon Ka 128 Kbps.mp3` },
+{ title: "AASMAN KE NEECHE JEWEL THIEF", src: `${BASE}audio/kishore/38 - AASMAN KE NEECHE - JEWEL THIEF.mp3` },
+{ title: "Aate Jate Khoobsurat Awara", src: `${BASE}audio/kishore/39 - Aate Jate Khoobsurat Awara.mp3` },
+{ title: "Aaye Tum Yaad Mujhe Lofi Flip", src: `${BASE}audio/kishore/40 - Aaye Tum Yaad Mujhe Lofi Flip.mp3` },
+{ title: "Ab Jo Hoga So Hone Do", src: `${BASE}audio/kishore/41 - Ab Jo Hoga So Hone Do.mp3` },
+{ title: "Ab Ke Sawan Mein Jee Dare", src: `${BASE}audio/kishore/42 - Ab Ke Sawan Mein Jee Dare.mp3` },
+{ title: "Achha Chalo Ji Baba Maaf Kar Do", src: `${BASE}audio/kishore/43 - Achha Chalo Ji Baba Maaf Kar Do.mp3` },
+{ title: "Achha To Hum Chalte Hain", src: `${BASE}audio/kishore/44 - Achha To Hum Chalte Hain.mp3` },
+{ title: "Achhe Bachche Nahin Rote Hain", src: `${BASE}audio/kishore/45 - Achhe Bachche Nahin Rote Hain.mp3` },
+{ title: "Achhi Nahin Sanam Dillagi", src: `${BASE}audio/kishore/46 - Achhi Nahin Sanam Dillagi.mp3` },
+{ title: "Ae Haseeno Nazneeno", src: `${BASE}audio/kishore/47 - Ae Haseeno Nazneeno.mp3` },
+{ title: "Ae Lo Pyar Ke Din Aaye", src: `${BASE}audio/kishore/48 - Ae Lo Pyar Ke Din Aaye.mp3` },
+{ title: "Ae Mere Watan Ke Logon", src: `${BASE}audio/kishore/49 - Ae Mere Watan Ke Logon.mp3` },
+{ title: "Ae Oh Aa Zara Mudke", src: `${BASE}audio/kishore/50 - Ae Oh Aa Zara Mudke.mp3` },
+{ title: "Ae Sagar Ki Laheron", src: `${BASE}audio/kishore/51 - Ae Sagar Ki Laheron.mp3` },
+{ title: "Aesi Haseen Chandni", src: `${BASE}audio/kishore/52 - Aesi Haseen Chandni.mp3` },
+{ title: "Ae Wadiye Kashmir", src: `${BASE}audio/kishore/53 - Ae Wadiye Kashmir.mp3` },
+{ title: "Ae Yaar Sun Yaari Teri", src: `${BASE}audio/kishore/54 - Ae Yaar Sun Yaari Teri.mp3` },
+{ title: "Agar Mujhse Mohabbat Hai", src: `${BASE}audio/kishore/55 - Agar Mujhse Mohabbat Hai.mp3` },
+{ title: "Agar Tum Na Hote", src: `${BASE}audio/kishore/56 - Agar Tum Na Hote.mp3` },
+{ title: "Ai Mere Bete Sun", src: `${BASE}audio/kishore/57 - Ai Mere Bete Sun.mp3` },
+{ title: "Aisa Ho To Kaisa Ho", src: `${BASE}audio/kishore/58 - Aisa Ho To Kaisa Ho.mp3` },
+{ title: "Aise Na Mujhe", src: `${BASE}audio/kishore/59 - Aise Na Mujhe.mp3` },
+{ title: "Aiyo Aiyo Kehdo Zamane Se", src: `${BASE}audio/kishore/60 - Aiyo Aiyo Kehdo Zamane Se.mp3` }
+]
 },
 
     Mukesh: {
       name: 'Mukesh',
       displayName: 'Mukesh',
-      songs: [
-        { title: 'Ae Pyase Dil Bezuban', src: '/audio/mukesh/song1.mp3' },
-        { title: 'Chandi Ki Deewar', src: '/audio/mukesh/song2.mp3' },
-        { title: 'Dil Ki Nazar Se', src: '/audio/mukesh/song3.mp3' },
-        { title: 'Duniya Walon Se Door', src: '/audio/mukesh/song4.mp3' },
-        { title: 'Ek Din Bik Jayega Mati Ke Mol', src: '/audio/mukesh/song5.mp3' },
-        { title: 'Gaa Diwane Jhoom Ke', src: '/audio/mukesh/song6.mp3' }, 
-        { title: 'Joshe Jawani Hai Re', src: '/audio/mukesh/song7.mp3' },
-        { title: 'Jo Chala Gaya Use Bhool Ja', src: '/audio/mukesh/song25.mp3' },
-        { title: 'Jo Tumko Ho Pasand', src: '/audio/mukesh/song8.mp3' },
-        { title: 'Kai Baar Yun Bhi Dekha Hai', src: '/audio/mukesh/song9.mp3' },
-        { title: 'Kisi Ki Muskurahaton Se', src: '/audio/mukesh/song10.mp3' },
-        { title: 'Kya Khoob Lagti Ho', src: '/audio/mukesh/song11.mp3' },
-        { title: 'Mana Ki Tere Pyar Mein', src: '/audio/mukesh/song12.mp3' },
-        { title: 'Mehtab Tera Chehra', src: '/audio/mukesh/song13.mp3' },
-        { title: 'Mere Toote Huye Dil Se', src: '/audio/mukesh/song14.mp3' },
-        { title: 'Nayan Hamare Sanjh Sakare', src: '/audio/mukesh/song15.mp3' },
-        { title: 'O Shama Mujhe Phoonk De', src: '/audio/mukesh/song16.mp3' },
-        { title: 'Suhani Chandni Raaten', src: '/audio/mukesh/song17.mp3' },
-        { title: 'Taron Mein Sajke', src: '/audio/mukesh/song18.mp3' },
-        { title: 'Teri Yaad Dil Se Bhulane Chala Hoon', src: '/audio/mukesh/song19.mp3' },
-        { title: 'Woh Tere Pyar Ka Gham', src: '/audio/mukesh/song20.mp3' },
-        { title: 'Woh Zindagi Sapnon Ka Saudagar', src: '/audio/mukesh/song21.mp3' },
-        { title: 'Zindagi Mein Aap Aaye', src: '/audio/mukesh/song22.mp3' },
-        { title: 'Zuban Pe Dard Bhari Dastan', src: '/audio/mukesh/song23.mp3' },
-        { title: 'Insaan Hanse Ya Roye', src: '/audio/mukesh/song24.mp3' },
-      ]
+      songs: []
     },
+
     Lata: {
       name: 'Lata Mangeshkar',
       displayName: 'Lata',
-      songs: [
-        { title: 'Aa Jaane Jaan', src: '/audio/lata/song1.mp3' },
-        { title: 'Aa Ja Re Ab Mera Dil Pukare', src: '/audio/lata/song2.mp3' },
-        { title: 'Aap Ki Nazron Ne Samjha', src: '/audio/lata/song3.mp3' },
-        { title: 'Ajib Dastan Hai Yeh', src: '/audio/lata/song4.mp3' },
-        { title: 'Aye Dil-E-Nadan', src: '/audio/lata/song5.mp3' },
-        { title: 'Do Ghoont Mujhe Bhi Pila De', src: '/audio/lata/song6.mp3' },
-        { title: 'Gumnaam Hai Koi', src: '/audio/lata/song7.mp3' },
-        { title: 'Hum The Jinke Sahare', src: '/audio/lata/song8.mp3' },
-        { title: 'Itna Na Mujhse Tu Pyar Badha', src: '/audio/lata/song9.mp3' },
-        { title: 'Ja Re Ja Re Ud Ja Re Panchhi', src: '/audio/lata/song10.mp3' },
-        { title: 'Kabhi Main Kahoon', src: '/audio/lata/song11.mp3' },
-        { title: 'Kitna Haseen Hain Mausam', src: '/audio/lata/song12.mp3' },
-        { title: 'Kuchh Dil Ne Kaha Kuchh Bhi Nahin', src: '/audio/lata/song13.mp3' },
-        { title: 'Lag Ja Gale Se Phir', src: '/audio/lata/song14.mp3' },
-        { title: 'Lehra Ke Aaya Hai Jhoka Bahar Ka', src: '/audio/lata/song15.mp3' },
-        { title: 'Lo Aa Gayi Unki Yaad', src: '/audio/lata/song16.mp3' },
-        { title: 'Mera Dil Yeh Pukare Aaja', src: '/audio/lata/song17.mp3' },
-        { title: 'Mere Naseeb Mein Tu Hai Ki', src: '/audio/lata/song18.mp3' },
-        { title: 'Mubarak Ho Tujhe Ae Dil', src: '/audio/lata/song19.mp3' },
-        { title: 'Na Jane Kyon Hota Hai', src: '/audio/lata/song20.mp3' },
-        { title: 'Rajnigandha Phool Tumhare', src: '/audio/lata/song21.mp3' },
-        { title: 'Rangeela Re', src: '/audio/lata/song22.mp3' },
-        { title: 'Roz Sham Aati Hai Magar Aesi Imtihan', src: '/audio/lata/song23.mp3' },
-        { title: 'Ruk Ja Raat', src: '/audio/lata/song24.mp3' },
-        { title: 'Tera Jana', src: '/audio/lata/song25.mp3' },
-        { title: 'Unse Mili Nazar Ke Mere Hosh Ud Gai', src: '/audio/lata/song26.mp3' },
-        { title: 'Wada Kar Le Sajna', src: '/audio/lata/song27.mp3' },
-        { title: 'Woh Bhooli Dastan Lo Phir Yaad', src: '/audio/lata/song28.mp3' },
-        { title: 'Yeh Raat Bheegi Bheegi', src: '/audio/lata/song29.mp3' },
-        { title: 'Yeh Raaten Julie', src: '/audio/lata/song30.mp3' },
-        { title: 'Ye Samaa Samaa Hai Pyar Ka', src: '/audio/lata/song31.mp3' }
-      ]
+      songs: []
     }
   };
 
@@ -515,13 +385,15 @@ const App = () => {
       </div>
 
       <header>
-        <h1>
-          <span className="music-icon-left">𝄞</span>
-          Golden Era Music Player
-          <span className="music-icon-right">♪</span>
-        </h1>
-        <p className="subtitle">Experience the legends of Indian music</p>
-      </header>
+  <h1 className="title-animate">
+    <span className="music-icon-left">𝄞</span>
+    Golden Era Music Player
+  </h1>
+
+  <p className="subtitle subtitle-animate">
+    Experience the legends of Indian music
+  </p>
+</header>
 
       {/* Animated Artist Images - FIXED image paths */}
       <div className="artists-container">
@@ -575,6 +447,7 @@ const App = () => {
             ⏭
           </button>
         </div>
+       {isPlaying && <Equalizer isPlaying={isPlaying} />}
 
         {/* Progress Bar */}
         <div className="progress-container">
@@ -602,6 +475,10 @@ const App = () => {
             onChange={handleVolumeChange}
             className="volume-slider"
           />
+          
+          <div style={{ color: "red", fontSize: "20px" }}>
+        </div>
+        <Equalizer isPlaying={isPlaying} />
           <span className="volume-percentage">{Math.round(volume * 100)}%</span>
         </div>
 
@@ -662,7 +539,7 @@ const App = () => {
       />
 
       <footer>
-        <p>Made with ❤️ for classic music lovers</p>
+        <p>Made with ❤️ for classic music lovers By Jeevan</p>
         {!hasUserInteracted && (
           <p className="click-hint">👆 Click the play button to start music</p>
         )}
